@@ -4,13 +4,11 @@
 void
 IotsaSensorMod::handler() {
   bool anyChanged = false;
-  for (uint8_t i=0; i<server->args(); i++){
-    if( server->argName(i) == "interval") {
-    	if (needsAuthentication()) return;
-    	String sInterval = server->arg(i);
-    	interval = sInterval.toInt();
-    	anyChanged = true;
-    }
+  if( server->hasArg("interval")) {
+    if (needsAuthentication()) return;
+    String sInterval = server->arg("interval");
+    interval = sInterval.toInt();
+    anyChanged = true;
   }
   if (anyChanged) configSave();
 
