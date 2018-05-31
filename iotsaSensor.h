@@ -1,6 +1,7 @@
 #ifndef _IOTSASENSOR_H_
 #define _IOTSASENSOR_H_
 #include "iotsa.h"
+#include "iotsaApi.h"
 
 typedef uint16_t SensorBufferItemValueType;
 typedef struct {
@@ -18,23 +19,25 @@ public:
   {}
   void add(SensorBufferItemValueType value);
   void compact();
-  void toJSON(String &json);
+  void toJSON(JsonObject& reply);
   int nItem;
   SensorBufferItem items[SENSORBUFFERSIZE];
 };
 
-class IotsaSensorMod : public IotsaMod {
+class IotsaSensorMod : public IotsaApiMod {
 public:
-  using IotsaMod::IotsaMod;
+  IotsaSensorMod(IotsaApplication &_app) : IotsaApiMod(_app) {}
   void setup();
   void serverSetup();
   void loop();
   String info();
+  using IotsaBaseMod::needsAuthentication;
 protected:
   void configLoad();
   void configSave();
   void handler();
-  void apiHandler();
+  bool getHandler(const char *path, JsonObject& reply);
+  bool putHandler(const char *path, const JsonVariant& request, JsonObject& reply);
   int interval;
   uint32_t lastReading;
   SensorBuffer buffer;

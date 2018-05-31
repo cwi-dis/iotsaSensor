@@ -1,6 +1,7 @@
 #include "iotsaSensor.h"
 #include "iotsaConfigFile.h"
 
+#ifdef IOTSA_WITH_WEB
 void
 IotsaSensorMod::handler() {
   bool anyChanged = false;
@@ -19,11 +20,25 @@ IotsaSensorMod::handler() {
   server->send(200, "text/html", message);
 }
 
-void
-IotsaSensorMod::apiHandler() {
-  String message;
-  buffer.toJSON(message);
-  server->send(200, "application/json", message);
+String IotsaSensorMod::info() {
+  String message = "<p>Timed sensor readings. See <a href=\"/sensor\">/sensor</a> for configuration, <a href=\"/api\">/api</a> for readings.</p>";
+  return message;
+}
+#endif // IOTSA_WITH_WEB
+
+bool IotsaSensorMod::getHandler(const char *path, JsonObject& reply) {
+  buffer.toJSON(reply);
+  reply["interval"] = interval;
+  return true;
+}
+
+bool IotsaSensorMod::putHandler(const char *path, const JsonVariant& request, JsonObject& reply) {
+  if (!request.is<JsonObject>()) return false;
+  JsonObject& reqObj = request.as<JsonObject>();
+  if (!reqObj.containsKey("interval")) return false;
+  interval = reqObj.get<int>("interval");
+  configSave();
+  return true;
 }
 
 void IotsaSensorMod::setup() {
@@ -31,8 +46,11 @@ void IotsaSensorMod::setup() {
 }
 
 void IotsaSensorMod::serverSetup() {
+#ifdef IOTSA_WITH_WEB
   server->on("/sensor", std::bind(&IotsaSensorMod::handler, this));
-  server->on("/api", std::bind(&IotsaSensorMod::apiHandler, this));
+#endif
+  api.setup("/api/sensor", true, true);
+  name = "sensor";
 }
 
 void IotsaSensorMod::configLoad() {
@@ -54,11 +72,6 @@ void IotsaSensorMod::loop() {
   }
 }
 
-String IotsaSensorMod::info() {
-  String message = "<p>Timed sensor readings. See <a href=\"/sensor\">/sensor</a> for configuration, <a href=\"/api\">/api</a> for readings.</p>";
-  return message;
-}
-
 void SensorBuffer::add(SensorBufferItemValueType value)
 {
   if (nItem >= SENSORBUFFERSIZE) compact();
@@ -75,18 +88,19 @@ void SensorBuffer::compact()
   nItem -= toRemove;
 }
 
-void SensorBuffer::toJSON(String &json)
+void SensorBuffer::toJSON(JsonObject &replyObj)
 {
-  if (nItem == 0) {
-    json += "{}";
-    return;
-  }
+  if (nItem == 0) return;
   uint32_t curTime = items[0].timestamp;
-  json += "{\"timestamp\":" + String(curTime);
+  replyObj["timestamp"] = curTime;
+  JsonArray& values = replyObj.createNestedArray("data");
+
   for (int i=0; i<nItem; i++) {
-    json += ",{\"dt\":" + String(items[i].timestamp-curTime) + ",\"v\":" + String(items[i].value) + "}";
+    uint32_t delta = items[i].timestamp-curTime;
+    JsonObject& curValue = values.createNestedObject();
+    curValue["dt"] = delta;
+    curValue["v"] = items[i].value;
     curTime = items[i].timestamp;
   }
-  json += "}";
 }
 
