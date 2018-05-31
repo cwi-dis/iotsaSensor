@@ -4,10 +4,10 @@
 void
 IotsaSensorMod::handler() {
   bool anyChanged = false;
-  for (uint8_t i=0; i<server.args(); i++){
-    if( server.argName(i) == "interval") {
+  for (uint8_t i=0; i<server->args(); i++){
+    if( server->argName(i) == "interval") {
     	if (needsAuthentication()) return;
-    	String sInterval = server.arg(i);
+    	String sInterval = server->arg(i);
     	interval = sInterval.toInt();
     	anyChanged = true;
     }
@@ -18,14 +18,14 @@ IotsaSensorMod::handler() {
   message += "<form method='get'>Interval (ms): <input name='interval' value='";
   message += String(interval);
   message += "'><br><input type='submit'></form>";
-  server.send(200, "text/html", message);
+  server->send(200, "text/html", message);
 }
 
 void
 IotsaSensorMod::apiHandler() {
   String message;
   buffer.toJSON(message);
-  server.send(200, "application/json", message);
+  server->send(200, "application/json", message);
 }
 
 void IotsaSensorMod::setup() {
@@ -33,8 +33,8 @@ void IotsaSensorMod::setup() {
 }
 
 void IotsaSensorMod::serverSetup() {
-  server.on("/sensor", std::bind(&IotsaSensorMod::handler, this));
-  server.on("/api", std::bind(&IotsaSensorMod::apiHandler, this));
+  server->on("/sensor", std::bind(&IotsaSensorMod::handler, this));
+  server->on("/api", std::bind(&IotsaSensorMod::apiHandler, this));
 }
 
 void IotsaSensorMod::configLoad() {

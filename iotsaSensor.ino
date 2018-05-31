@@ -18,8 +18,7 @@
 #undef WITH_FILESUPLOAD  // Enable upload of static files for webserver
 #undef WITH_FILESBACKUP  // Enable backup of all files including config files and webserver files
 
-ESP8266WebServer server(80);
-IotsaApplication application(server, "Iotsa Sensor Server");
+IotsaApplication application("Iotsa Sensor Server");
 IotsaWifiMod wifiMod(application);
 
 #ifdef WITH_NTP
