@@ -34,9 +34,9 @@ bool IotsaSensorMod::getHandler(const char *path, JsonObject& reply) {
 
 bool IotsaSensorMod::putHandler(const char *path, const JsonVariant& request, JsonObject& reply) {
   if (!request.is<JsonObject>()) return false;
-  JsonObject& reqObj = request.as<JsonObject>();
+  JsonObject reqObj = request.as<JsonObject>();
   if (!reqObj.containsKey("interval")) return false;
-  interval = reqObj.get<int>("interval");
+  interval = reqObj["interval"];
   configSave();
   return true;
 }
@@ -93,11 +93,11 @@ void SensorBuffer::toJSON(JsonObject &replyObj)
   if (nItem == 0) return;
   uint32_t curTime = items[0].timestamp;
   replyObj["timestamp"] = curTime;
-  JsonArray& values = replyObj.createNestedArray("data");
+  JsonArray values = replyObj.createNestedArray("data");
 
   for (int i=0; i<nItem; i++) {
     uint32_t delta = items[i].timestamp-curTime;
-    JsonObject& curValue = values.createNestedObject();
+    JsonObject curValue = values.createNestedObject();
     curValue["dt"] = delta;
     curValue["v"] = items[i].value;
     curTime = items[i].timestamp;
