@@ -26,7 +26,7 @@ public:
 
 class IotsaSensorMod : public IotsaApiMod {
 public:
-  IotsaSensorMod(IotsaApplication &_app) : IotsaApiMod(_app) {}
+  IotsaSensorMod(IotsaApplication &_app) : IotsaApiMod(_app), interval(0), lastReading(0) {}
   void setup() override;
   void serverSetup() override;
   void loop() override;
