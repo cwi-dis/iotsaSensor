@@ -1,7 +1,15 @@
 # iotsaSensor - web server to record time series from a sensor
 
-![build-platformio](https://github.com/cwi-dis/iotsaSensor/workflows/build-platformio/badge.svg)
-![build-arduino](https://github.com/cwi-dis/iotsaSensor/workflows/build-arduino/badge.svg)
+> **Archived 2026-09-01.** This was an unfinished 2018 experiment (last real code
+> work then; "work in progress" was never resolved). Its idea — sample an analog
+> pin at an interval, serve the readings over the network — is fully covered, and
+> done properly, by **[iotsaDataLogger](https://github.com/cwi-dis/iotsaDataLogger)**:
+> LittleFS-backed storage that survives reboot, NTP wall-clock timestamps,
+> deep-sleep for battery use, CSV readout, a configurable pin — and it is actually
+> deployed. iotsaSensor by contrast kept its whole buffer in RAM (lost on reboot,
+> ~17 minutes at the default interval), timestamped only in `millis()` since boot,
+> and re-serialised the entire buffer on every read. It was never migrated to the
+> iotsa v3 API. Use iotsaDataLogger instead.
 
 IotsaSensor is work in progress.
 It reads an analog sensor repeatedly at a settable interval and records these readings in a buffer.
